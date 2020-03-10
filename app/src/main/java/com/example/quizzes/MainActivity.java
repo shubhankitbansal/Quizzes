@@ -47,13 +47,12 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences preferences;
     public static final String pref="My Pref File";
     String imageUrl;
-    int x;
+    //int y=-1;
     DatabaseReference reference;
     //String questions1,options1,options2,options3,options4;
     //String key;
-    List<String> questionsList;
+    List<Questions> questionsList;
     Questions questions;
-    int size;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i("TAG",Integer.toString(questionsList.size()));
 
         flag=1;
-       // generateQuestion();
+        // generateQuestion();
 
         playAgain.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -135,10 +134,17 @@ public class MainActivity extends AppCompatActivity {
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                size = (int)dataSnapshot.getChildrenCount();
                 for(DataSnapshot snapshot : dataSnapshot.getChildren()){
                     String key = snapshot.getKey();
-                    questionsList.add(key);
+                    String q1 = snapshot.child("questions").getValue().toString();
+                    String o1 = snapshot.child("option1").getValue().toString();
+                    String o2 = snapshot.child("option2").getValue().toString();
+                    String o3 = snapshot.child("option3").getValue().toString();
+                    String o4 = snapshot.child("option4").getValue().toString();
+                    String a = snapshot.child("answer").getValue().toString();
+                    String im = snapshot.child("imageUrl").getValue().toString();
+                    questions = new Questions(q1,o1,o2,o3,o4,a,im);
+                    questionsList.add(questions);
                 }
                 Log.i("TAG",Integer.toString(questionsList.size()));
                 generateQuestion();
@@ -162,86 +168,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void generateQuestion(){
-        final Random random = new Random();
-        x = random.nextInt(size);
-        String key1 = questionsList.get(x);
-        DatabaseReference dReference = FirebaseDatabase.getInstance().getReference().child("questions").child(key1) ;
-        dReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String q = dataSnapshot.child("questions").getValue().toString();
-                question.setText(q);
-                String o1 = dataSnapshot.child("option1").getValue().toString();
-                option1.setText(o1);
-                String o2 = dataSnapshot.child("option2").getValue().toString();
-                option2.setText(o2);
-                String o3 = dataSnapshot.child("option3").getValue().toString();
-                option3.setText(o3);
-                String o4 = dataSnapshot.child("option4").getValue().toString();
-                option4.setText(o4);
-                correctAnswer = dataSnapshot.child("answer").getValue().toString();
-                imageUrl = dataSnapshot.child("imageUrl").getValue().toString();
-
-                if(o1.equals(correctAnswer)){
-                    correctPostion = 1;
-                }
-                else if(o2.equals(correctAnswer)){
-                    correctPostion = 2;
-                }
-                else if(o3.equals(correctAnswer)){
-                    correctPostion = 3;
-                }
-                else if(o4.equals(correctAnswer)){
-                    correctPostion = 4;
-                }
-                try {
-                    DownloadImage image = new DownloadImage();
-                    Bitmap myBitmap = image.execute(imageUrl).get();
-                    imageView.setImageBitmap(myBitmap);
-                }
-                catch (Exception e){
-                    e.printStackTrace();
-                }
-                totalQuestionAsked++;
-                startTimer();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-//        int x = random.nextInt(questionsList.size());
-//        questions = questionsList.get(x);
-//        question.setText(questions.getQuestions());
-//        option1.setText(questions.getOption1());
-//        option2.setText(questions.getOption2());
-//        option3.setText(questions.getOption3());
-//        option4.setText(questions.getOption4());
-//        correctAnswer = questions.getAnswer();
-//        if(questions.getOption1().equals(correctAnswer)){
-//            correctPostion = 1;
-//        }
-//        else if(questions.getOption2().equals(correctAnswer)){
-//            correctPostion = 2;
-//        }
-//        else if(questions.getOption3().equals(correctAnswer)){
-//            correctPostion = 3;
-//        }
-//        else if(questions.getOption4().equals(correctAnswer)){
-//            correctPostion = 4;
-//        }
-//        imageUrl = questions.getImageUrl();
-//        try {
-//            DownloadImage image = new DownloadImage();
-//            Bitmap myBitmap = image.execute(imageUrl).get();
-//            imageView.setImageBitmap(myBitmap);
-//        }
-//        catch (Exception e){
-//            e.printStackTrace();
-//        }
-//        totalQuestionAsked++;
-//        startTimer();
+        Random random = new Random();
+        int x = random.nextInt(questionsList.size());
+        questions = questionsList.get(x);
+        question.setText(questions.getQuestions());
+        option1.setText(questions.getOption1());
+        option2.setText(questions.getOption2());
+        option3.setText(questions.getOption3());
+        option4.setText(questions.getOption4());
+        correctAnswer = questions.getAnswer();
+        if(questions.getOption1().equals(correctAnswer)){
+            correctPostion = 1;
+        }
+        else if(questions.getOption2().equals(correctAnswer)){
+            correctPostion = 2;
+        }
+        else if(questions.getOption3().equals(correctAnswer)){
+            correctPostion = 3;
+        }
+        else if(questions.getOption4().equals(correctAnswer)){
+            correctPostion = 4;
+        }
+        imageUrl = questions.getImageUrl();
+        try {
+            DownloadImage image = new DownloadImage();
+            Bitmap myBitmap = image.execute(imageUrl).get();
+            imageView.setImageBitmap(myBitmap);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        totalQuestionAsked++;
+        startTimer();
 
     }
 
