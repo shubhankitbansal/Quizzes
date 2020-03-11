@@ -2,10 +2,14 @@ package com.example.quizzes;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 
+import android.animation.ObjectAnimator;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -13,6 +17,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,9 +36,16 @@ import java.util.List;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
+    RelativeLayout myLayout;
+    AnimationDrawable mAnimationDrawable;
+    CardView mCardView1;
+    CardView mCardView5;
+    CardView mCardView2;
+    CardView mCardView3;
+    CardView mCardView4;
     ImageView imageView;
     TextView question;
-    Button option1,option2,option3,option4;
+    TextView option1,option2,option3,option4;
     int correctPostion;
     String correctAnswer;
     TextView correct;
@@ -53,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     //String key;
     List<Questions> questionsList;
     Questions questions;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,10 +81,44 @@ public class MainActivity extends AppCompatActivity {
         correct = findViewById(R.id.correct);
         timer = findViewById(R.id.timer);
         highScore = findViewById(R.id.highScore);
+        myLayout =  findViewById(R.id.myLayout);
+        mAnimationDrawable = (AnimationDrawable) myLayout.getBackground();
+        mAnimationDrawable.setEnterFadeDuration(1000);
+        mAnimationDrawable.setExitFadeDuration(2000);
+        mAnimationDrawable.start();
+        mCardView1 =  findViewById(R.id.cardView1);
+        mCardView1.setTranslationX(-1000f);
+        ObjectAnimator animation = ObjectAnimator.ofFloat(mCardView1, "translationX", 0f);
+        animation.setDuration(500);
+        animation.start();
+        mCardView2 =  findViewById(R.id.cardView2);
+        mCardView2.setTranslationX(-1000f);
+        ObjectAnimator animation1 = ObjectAnimator.ofFloat(mCardView2, "translationX", 0f);
+        animation1.setDuration(1000);
+        animation1.start();
+        mCardView3 =  findViewById(R.id.cardView3);
+        mCardView3.setTranslationX(-1000f);
+        ObjectAnimator animation2 = ObjectAnimator.ofFloat(mCardView3, "translationX", 0f);
+        animation2.setDuration(1500);
+        animation2.start();
+        mCardView4 =  findViewById(R.id.cardView4);
+        mCardView4.setTranslationX(-1000f);
+        ObjectAnimator animation3 = ObjectAnimator.ofFloat(mCardView4, "translationX", 0f);
+        animation3.setDuration(2000);
+        animation3.start();
+        mCardView5 = findViewById(R.id.cardView5);
+        mCardView5.setTranslationX(-1000f);
+        ObjectAnimator animation4 = ObjectAnimator.ofFloat(mCardView5, "translationX", 0f);
+        animation4.setDuration(2500);
+        animation4.start();
+
+
+        // progressBar = findViewById(R.id.progress);
+        //progressBar.setVisibility(View.VISIBLE);
         questionsList = new ArrayList<>();
         totalQuestionAsked=0;
         noOfCorrectAnswer=0;
-        playAgain = findViewById(R.id.playAgain);
+        //playAgain = findViewById(R.id.playAgain);
         preferences = getSharedPreferences(pref,MODE_PRIVATE);
         String x = preferences.getString("highScore","0");;
         highScore1 = Integer.parseInt(x);
@@ -80,23 +128,21 @@ public class MainActivity extends AppCompatActivity {
         Log.i("TAG",Integer.toString(questionsList.size()));
 
         flag=1;
-        // generateQuestion();
 
-        playAgain.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                noOfCorrectAnswer=0;
-                totalQuestionAsked=0;
-                generateQuestion();
-                option1.setEnabled(true);
-                option3.setEnabled(true);
-                option2.setEnabled(true);
-                option4.setEnabled(true);
-                correct.setText("0/0");
-            }
-        });
-
-
+//        playAgain.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                progressBar.setVisibility(View.VISIBLE);
+//                noOfCorrectAnswer=0;
+//                totalQuestionAsked=0;
+//                generateQuestion();
+//                option1.setEnabled(true);
+//                option3.setEnabled(true);
+//                option2.setEnabled(true);
+//                option4.setEnabled(true);
+//                correct.setText("0/0");
+//            }
+//        });
 
         option1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -199,6 +245,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         totalQuestionAsked++;
+      //  progressBar.setVisibility(View.INVISIBLE);
         startTimer();
 
     }
@@ -208,13 +255,18 @@ public class MainActivity extends AppCompatActivity {
             public void onTick(long millisUntilFinished) {
                 timer.setText(millisUntilFinished / 1000 + "s");
             }
+
             public void onFinish() {
-                timer.setText("done!");
+                timer.setText("0s");
                 option1.setEnabled(false);
-                option2.setEnabled(false);
+                        option2.setEnabled(false);
                 option3.setEnabled(false);
                 option4.setEnabled(false);
-                correct.setText(Integer.toString(noOfCorrectAnswer) + "/" + Integer.toString(totalQuestionAsked));
+                mCardView2.setCardBackgroundColor(Color.rgb(179,158,158));
+                mCardView3.setCardBackgroundColor(Color.rgb(179,158,158));
+                mCardView4.setCardBackgroundColor(Color.rgb(179,158,158));
+                mCardView5.setCardBackgroundColor(Color.rgb(179,158,158));
+                correct.setText("Your Score: " + Integer.toString(noOfCorrectAnswer) + "/" + Integer.toString(totalQuestionAsked));
             }
         }.start();
     }
@@ -239,13 +291,14 @@ public class MainActivity extends AppCompatActivity {
     public void checkAnswer(String tag){
         countDownTimer.cancel();
         if(tag.equals(Integer.toString(correctPostion))){
+           // progressBar.setVisibility(View.VISIBLE);
             showToast("Correct");
             noOfCorrectAnswer++;
             if(highScore1<noOfCorrectAnswer){
                 highScore1=noOfCorrectAnswer;
             }
             saveHighScore();
-            correct.setText(Integer.toString(noOfCorrectAnswer) + "/" + Integer.toString(totalQuestionAsked));
+            correct.setText("Your Score: " +Integer.toString(noOfCorrectAnswer) + "/" + Integer.toString(totalQuestionAsked));
             highScore.setText(Integer.toString(highScore1));
             generateQuestion();
         }
@@ -255,8 +308,12 @@ public class MainActivity extends AppCompatActivity {
             option2.setEnabled(false);
             option3.setEnabled(false);
             option4.setEnabled(false);
+            mCardView2.setCardBackgroundColor(Color.rgb(179,158,158));
+            mCardView3.setCardBackgroundColor(Color.rgb(179,158,158));
+            mCardView4.setCardBackgroundColor(Color.rgb(179,158,158));
+            mCardView5.setCardBackgroundColor(Color.rgb(179,158,158));
             countDownTimer.cancel();
-            correct.setText(Integer.toString(noOfCorrectAnswer) + "/" + Integer.toString(totalQuestionAsked));
+            correct.setText("Your Score: " + Integer.toString(noOfCorrectAnswer) + "/" + Integer.toString(totalQuestionAsked));
             highScore.setText(Integer.toString(highScore1));
         }
     }
